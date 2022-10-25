@@ -175,7 +175,7 @@ namespace TGG_UI
             this.panelResetPassword.Hide();
             this.panelResetPassword.Location = new System.Drawing.Point(137, 57);
             this.panelResetPassword.Name = "panelResetPassword";
-            this.panelResetPassword.Size = new System.Drawing.Size(305, 290);
+            this.panelResetPassword.Size = new System.Drawing.Size(305, 500);
             this.panelResetPassword.TabIndex = 13;
             this.panelResetPassword.TabStop = true;
             // 

@@ -19,13 +19,11 @@ namespace TGG_UI
         private List<Ticket> tickets;
         private Timer timer;
         private Employee employee;
-        private string filterText;
 
         public TicketsOverview(Employee employee)
         {
             InitializeComponent();
             this.employee = employee;
-            this.filterText = "";
             NavbarChange();
             DisableButtonsIfNotSD();
         }
@@ -83,15 +81,8 @@ namespace TGG_UI
         {
             try
             {
-                if (filterText.Length > 0)
-                {
-                    gridViewTickets.DataSource = filterTickets(filterText);
-                }
-                else
-                {
-                    //gridview will begiven the tickets data from MongoDB
-                    gridViewTickets.DataSource = tickets;
-                }
+                //gridview will begiven the tickets data from MongoDB
+                gridViewTickets.DataSource = tickets;
 
                 //formatting the specified columns below
                 this.gridViewTickets.Columns["TimeAdded"].DefaultCellStyle.Format = "dd/MM/yyyy HH:mm:ss";
@@ -208,40 +199,16 @@ namespace TGG_UI
 
         private void buttonFilter_Click(object sender, EventArgs e)
         {
-            filterText = textBoxFilter.Text;
+            string filterText = textBoxFilter.Text;
 
             if (filterText.Length > 0)
             {
-                gridViewTickets.DataSource = filterTickets(filterText);
-            }
+                string[] subString;
+                List<Ticket> foundTickets = new List<Ticket>();
 
-            else
-            {
-                gridViewTickets.DataSource = tickets;
-            }
-        }
-
-        private List<Ticket> filterTickets(string filterText)
-        {
-            string[] subString;
-            List<Ticket> foundTickets = new List<Ticket>();
-
-            foreach (Ticket t in tickets)
-            {
-                subString = t.Description.Split(' ');
-
-                foreach (string s in subString)
+                foreach (Ticket t in tickets)
                 {
-                    if (s == filterText)
-                    {
-                        foundTickets.Add(t);
-                        break;
-                    }
-                }
-
-                if (foundTickets.Contains(t) == false)
-                {
-                    subString = t.Title.Split(' ');
+                    subString = t.Description.Split(' ');
 
                     foreach (string s in subString)
                     {
@@ -251,10 +218,20 @@ namespace TGG_UI
                             break;
                         }
                     }
+
+                    if (t.Title == filterText && foundTickets.Contains(t) == false)
+                    {
+                        foundTickets.Add(t);
+                    }
                 }
+
+                gridViewTickets.DataSource = foundTickets;
             }
 
-            return foundTickets;
+            else
+            {
+                gridViewTickets.DataSource = tickets;
+            }
         }
     }
 }

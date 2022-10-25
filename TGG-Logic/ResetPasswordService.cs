@@ -36,6 +36,8 @@ namespace TGG_Logic
         public void UpdateEmployeePassword(Employee employeeToUpdate)
         {
             BsonDocument filterElement = employeeToUpdate.ToBsonDocument();
+            string password = employeeToUpdate.Password;
+            string password2 = employeeToUpdate.Password;
             employeeToUpdate.Password = encryptionService.HashWithSalt(employeeToUpdate.Password);
             BsonDocument requiredUpdateElement = employeeToUpdate.ToBsonDocument();
             employeeDAO.UpdateEmployeePassword(filterElement.GetElement("email"), requiredUpdateElement.GetElement("password"));

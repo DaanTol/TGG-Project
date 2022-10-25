@@ -13,11 +13,13 @@ namespace TGG_DAL
     public class ResetPasswordDAO : BaseDAO
     {
         public ResetPasswordDAO() : base(TGGCollections.ValidationCodes) { }
+        //add to db so the user can use validationcodes they might've missed
         public void AddValidationCodes(TGGValidation validationCode)
         {
             BsonDocument bsonDoc = validationCode.ToBsonDocument();
             BsonSerializer.Deserialize<TGGValidation>(CreateOperation(new List<BsonDocument>() { bsonDoc }).First());
         }
+        //check if validation is in db
         public bool CheckValidationByElement(BsonElement filterElement, params BsonElement[] extraFilterElements)
         {
             FilterDefinition<BsonDocument> filter = Builders<BsonDocument>.Filter.Eq(filterElement.Name, filterElement.Value);
@@ -31,6 +33,7 @@ namespace TGG_DAL
             }
             return true;
         }
+        //get list of validations
         private List<TGGValidation> ReadValidationsDB(List<BsonDocument> filter)
         {
             List<TGGValidation> results = new List<TGGValidation>();

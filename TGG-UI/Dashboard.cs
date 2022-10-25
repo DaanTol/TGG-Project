@@ -29,6 +29,7 @@ namespace TGG_UI
         }
         private void ChangeNavBar()
         {
+            //make the employee management invisible
             if(!employee.IsSDEmployee)
             {
                 navigationBarPanel.ColumnStyles[2].Width = 0;
@@ -44,6 +45,7 @@ namespace TGG_UI
 
         public void FillCharts()
         {
+            //fill all three charts
             for(int i = Enum.GetValues(typeof(TGGPriorityLevel)).Length - 1; i >= 0; i--)
             {
                 FillChart((TGGPriorityLevel)i);
@@ -61,6 +63,7 @@ namespace TGG_UI
         }
         public void CheckIfEmptyChart(Chart chart)
         {
+            //check for amount of points that are empty.
             int count = 0;
             foreach(DataPoint dataPoints in chart.Series[0].Points)
             {
@@ -69,6 +72,7 @@ namespace TGG_UI
                     count++;
                 }
             }
+            //if all of the charts are empty, then tell the user it's empty
             if(count == chart.Series[0].Points.Count())
             {
                 TextAnnotation ta = new TextAnnotation();
@@ -95,8 +99,6 @@ namespace TGG_UI
         {
             this.Hide();
             new TicketsOverview(employee).ShowDialog();
-            this.Show();
-            UpdateDashboard();
             this.Close();
         }
 
@@ -114,8 +116,6 @@ namespace TGG_UI
 
         private void logOutButton_Click(object sender, EventArgs e)
         {
-            this.Hide();
-            new Login().ShowDialog();
             this.Close();
         }
     }

@@ -19,7 +19,6 @@ namespace TGG_Logic
         private EmployeeService employeeService;
         private ResetPasswordService resetPasswordService;
         IForgotPassword forgotPasswordForm;
-        private string email;
 
         public ResetPasswordController(IForgotPassword forgotPasswordForm)
         {
@@ -46,35 +45,37 @@ namespace TGG_Logic
 
         public void SendValidationEmail(string email)
         {
-            try
-            {
-                forgotPasswordForm.InstructionsOrErrorLabel = string.Empty;
-                employees = employeeService.GetEmployeesByElement(new Employee(email).ToBsonDocument().GetElement("email"));
-                CheckForValidEmail(email);
-                if (employees.Count != 0)
+                try
                 {
-                    var client = new SmtpClient("smtp.mailtrap.io", 2525)
+                    forgotPasswordForm.InstructionsOrErrorLabel = string.Empty;
+                    employees = employeeService.GetEmployeesByElement(new Employee(email).ToBsonDocument().GetElement("email"));
+                    CheckForValidEmail(email);
+                    if (employees.Count != 0)
                     {
-                        Credentials = new NetworkCredential("aee2f8f4701483", "119bbc2e9eaa33"),
-                        EnableSsl = true
-                    };
-                    TGGValidation validationForUser = new TGGValidation(email);
-                    client.Send("Support@TGG.com", email, "Reset Password", $"Your confirmation code is: {validationForUser.ValidationCode}." +
-                        $"\nThis code is only valid for 10 minutes.");
-                    resetPasswordService.InsertValidationCode(validationForUser);
-
+                        SendMail(email);
+                    }
+                    forgotPasswordForm.InstructionsOrErrorLabel = $"Verification mail has been sent to address: {email}\n" +
+                        "If you cannot find the email, please check your spam or look for spelling mistakes in the " +
+                        "entered mail address, otherwise please contact an operator.";
+                    forgotPasswordForm.StatusPassword = TGG_ResetPasswordStatus.EmailSent;
                 }
-                this.email = email;
-                forgotPasswordForm.InstructionsOrErrorLabel = $"Verification mail has been sent to address: {email}\n" +
-                    "If you cannot find the email, please check your spam or look for spelling mistakes in the " +
-                    "entered mail address, otherwise please contact an operator.";
-                forgotPasswordForm.StatusPassword = TGG_ResetPasswordStatus.EmailSent;
-            }
-            catch(Exception ex)
-            {
-                forgotPasswordForm.InstructionsOrErrorLabel = ex.Message;
-            }
+                catch (Exception ex)
+                {
+                    forgotPasswordForm.InstructionsOrErrorLabel = ex.Message + $"\n time: {DateTime.Now.ToString("hh:mm:ss")}";
+                }
 
+        }
+        private void SendMail(string email)
+        {
+            var client = new SmtpClient("smtp.mailtrap.io", 2525)
+            {
+                Credentials = new NetworkCredential("aee2f8f4701483", "119bbc2e9eaa33"),
+                EnableSsl = true
+            };
+            TGGValidation validationForUser = new TGGValidation(email);
+            client.Send("Support@TGG.com", email, "Reset Password", $"Your confirmation code is: {validationForUser.ValidationCode}." +
+                $"\nThis code is only valid for 10 minutes.");
+            resetPasswordService.InsertValidationCode(validationForUser);
         }
 
         public void UpdatePassword()
@@ -83,6 +84,7 @@ namespace TGG_Logic
             {
                 if (CheckForValidPassword())
                 {
+                    employees[0].Password = forgotPasswordForm.Password;
                     resetPasswordService.UpdateEmployeePassword(employees[0]);
                     forgotPasswordForm.StatusPassword = TGG_ResetPasswordStatus.PasswordChanged;
                     forgotPasswordForm.InstructionsOrErrorLabel = "successfully changed password. You can now close this and return to the login screen.";
